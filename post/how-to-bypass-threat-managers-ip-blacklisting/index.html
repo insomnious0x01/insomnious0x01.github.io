@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="description" content="Security research specialising in web technologies" />
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="shortcut icon" href="/favicon.ico" />
+		<meta property="og:site_name" content="Security research specialising in web technologies" />
+		<meta property="og:type" content="website" />
+		<meta property="og:image" content="/images/profile.png">
+		<meta name="twitter:site" content="@insomnious0x01"/>
+		<meta name="twitter:card" content="summary" />
+		<meta name="twitter:image" content="/images/profile.png"/>
+		<meta name="twitter:creator" content="@insomnious0x01"/>
+
+		<title>How to bypass Threat Manager&#039;s IP blacklisting</title>
+		<meta property="og:title" content="How to bypass Threat Manager&#039;s IP blacklisting | insomnious0x01.com" />
+		<meta property="og:description" content="I stumbled across a method of bypassing Threat Manager&#039;s IP blacklisting, an IDS product created by Alert Logic."/>
+		<meta property="og:url" content="https://insomnious0x01.com/how-to-bypass-threat-managers-ip-blacklisting" />
+		<meta property="article:published_time" content="2018-08-04T12:00:00+00:00"/>
+		<meta name="twitter:title" content="How to bypass Threat Manager&#039;s IP blacklisting | insomnious0x01.com" />
+		<meta name="twitter:description" content="I stumbled across a method of bypassing Threat Manager&#039;s IP blacklisting, an IDS product created by Alert Logic."/>
+		<meta name="twitter:url" content="https://insomnious0x01.com/how-to-bypass-threat-managers-ip-blacklisting" />
+		<link rel="stylesheet" type="text/css" href="/css/styles.css">
+	</head>
+	<body>
+		<nav class="navbar">
+			<section class="container" style="text-align: center;">
+				<ul>
+					<li><a href="/">Home</a></li>
+					<li><a href="/about">About</a></li>
+				</ul>
+			</section>
+		</nav>
+
+		<div class="container">
+			<div class="row">
+				<div class="column column-60 column-offset-20">
+					<h2>How to bypass Threat Manager&#039;s IP blacklisting</h2>
+					<p class="published">Published on 04/08/2018</p>
+
+					<p><a href="https://www.alertlogic.com/solutions/network-intrusion-detection-system-ids/">Threat Manager</a> is an Intrusion Detection System created by <a href="https://www.alertlogic.com/">Alert Logic</a>. Alert Logic likes to partner up with hosting companies who are responsible for installation and maintenance of these appliances.</p>
+					<h3>How I found it</h3>
+					<p>I was reviewing Threat Manager's incident logs and I stumbled across a couple of logs where attackers were bypassing Threat Manager's IP blacklisting.</p>
+					<p>I gathered the payloads, analysed them and tested this bypass to confirm if it works - and it did. My IP address wasn't blacklisted by the IDS, which means I was able to continue attacking the target. To my knowledge the IDS was fully up to date and there were no pending updates.</p>
+					<h3>How to use it</h3>
+					<p>To avoid getting yourself blacklisted by the Threat Manager, you need to pass two extra HTTP headers with your request, <code>X-Real-IP</code> and <code>X-Forwarded-For</code>, and set both of them to any IP address you like. Presence of these two HTTP headers will trick the IDS to treating you like a proxy server, so instead of blacklisting your IP address, it will blacklist an IP address that you supply in these two HTTP headers!</p>
+<blockquote>
+<p>Note: this is Threat Manager's <em>default</em> behaviour!</p>
+</blockquote>
+					<p>This is how the IP addresses will appear on the incident log:</p>
+<pre><code>ID: &lt;incident ID here&gt;
+Source: x.x.x.x (IP address from X-Real-IP and X-Forwarded-For headers)
+Destination: x.x.x.x (the target's private IP address, e.g. a web server)
+Proxy: x.x.x.x (attacker's public IP address)</code></pre>
+					<h3>How to fix it</h3>
+					<p>You can fix this behaviour by changing Threat Manager's settings to ignore the HTTP headers and blacklist attacker's public IP address. I was told by the hosting company's Network Security Engineer that &quot;there is a chance of blocking all requests that may be using a legitimate proxy, such as CDN. Most customers block based on the HTTP header, but you will have to decide what works best for your environment&quot;.</p>
+					<h3>Does it work anywhere else?</h3>
+					<p>I'd be interested to know how other IDS providers, commercial or open source, behave when <code>X-Real-IP</code> and <code>X-Forwarded-For</code> headers are passed through with a request. If you know, please let me know via <a href="https://twitter.com/insomnious0x01">Twitter</a>.</p>
+				</div>
+			</div>
+		</div>
+
+		<footer class="footer">
+			<section class="container" style="text-align: center;">
+				<div>
+					<p>Made by <a href="https://twitter.com/insomnious0x01" target="_blank" rel="noopener">@insomnious0x01</a></p>
+				</div>
+			</section>
+		</footer>
+	</body>
+</html>
+
